@@ -2,50 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Map</title>
+    <title>Reconstruct Image</title>
     <style>
         body {
-            background-color: black;
             margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevents scrolling */
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Viewport height */
-            width: 100vw; /* Viewport width */
+            background-color: black;
         }
-
-        #imageContainer {
-            text-align: center; /* Centering text inside the container */
-        }
-
-        img {
-            max-width: 90%; /* Adjust based on your preference */
-            max-height: 90%;
+        .centered-image img {
+            max-width: 100%;
+            max-height: 100%;
         }
     </style>
 </head>
 <body>
 
-<!-- Container for the image -->
-<div id="imageContainer"></div>
-
 <script>
-// Execute the display logic directly
-(function() {
-    const url = 'https://drive.usercontent.google.com/u/0/uc?id=1Fnh2z-yNPggErbcYdxgSm2qCLbirY8m3'; // Replace with your Google Drive file URL
+async function fetchAndReconstructImage() {
+    try {
+        // Define the number of chunks
+        const chunkCount = 4; // Adjusted to 4 as per your specification
 
-    fetch(url)
-        .then(response => response.blob())
-        .then(blob => {
-            // Create an image element to display the downloaded image
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(blob); // Use blob URL as the source
-            document.getElementById('imageContainer').appendChild(img); // Append the image to the specified div
-        })
-        .catch(error => console.error('Error displaying file:', error));
-})();
+        // Construct URLs for fetching the chunks
+        const urls = [];
+        for (let i = 0; i < chunkCount; i++) {
+            urls.push(`/raw/map/map_chunk_${i}.txt`);
+        }
+
+        // Fetch and concatenate the chunks
+        const responses = await Promise.all(urls.map(async url =>
+            fetch(url).then(response => response.text())
+        ));
+
+        // Assuming the fetched text is pure Base64 data, join them directly
+        const base64String = responses.join('');
+
+        if (base64String.length === 0) {
+            throw new Error("No data retrieved from chunks.");
+        }
+
+        // Reconstruct the image from the Base64 string
+        const binaryData = atob(base64String);
+        const arrayBuffer = new ArrayBuffer(binaryData.length);
+        const uint8View = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < binaryData.length; i++) {
+            uint8View[i] = binaryData.charCodeAt(i);
+        }
+
+        const blob = new Blob([arrayBuffer], {type: "image/png"}); // Adjust MIME type accordingly
+        const imageUrl = URL.createObjectURL(blob);
+
+        // Display the reconstructed image
+        const imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+        imgElement.alt = "Reconstructed Image";
+
+        // Wrap the image in a div for centering
+        const centeredDiv = document.createElement('div');
+        centeredDiv.className = 'centered-image';
+        centeredDiv.appendChild(imgElement);
+
+        // Append the wrapper div to the body instead of directly appending the img element
+        document.body.appendChild(centeredDiv);
+    } catch (error) {
+        console.error('Failed to reconstruct image:', error);
+    }
+}
+
+fetchAndReconstructImage();
 </script>
 
 </body>
