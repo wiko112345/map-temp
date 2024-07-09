@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Map</title>
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents scrolling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Viewport height */
+            width: 100vw; /* Viewport width */
+        }
+
+        #imageContainer {
+            text-align: center; /* Centering text inside the container */
+        }
+
+        img {
+            max-width: 90%; /* Adjust based on your preference */
+            max-height: 90%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Container for the image -->
+<div id="imageContainer"></div>
+
+<script>
+// Execute the display logic directly
+(function() {
+    const url = 'https://drive.usercontent.google.com/u/0/uc?id=1Fnh2z-yNPggErbcYdxgSm2qCLbirY8m3'; // Replace with your Google Drive file URL
+
+    fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+            // Create an image element to display the downloaded image
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob); // Use blob URL as the source
+            document.getElementById('imageContainer').appendChild(img); // Append the image to the specified div
+        })
+        .catch(error => console.error('Error displaying file:', error));
+})();
+</script>
+
+</body>
+</html>
