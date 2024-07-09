@@ -19,15 +19,6 @@
             max-height: 100%;
         }
     </style>
-    <!-- Open Graph Tags -->
-    <meta property="og:title" content="Image Reconstruction Demo" />
-    <meta property="og:description" content="Demonstration of reconstructing images from chunks." />
-    <meta property="og:url" content="YOUR_PAGE_URL_HERE" /> <!-- Replace with your actual page URL -->
-    <meta property="og:image" content="https://via.placeholder.com/468" /> <!-- Example placeholder image -->
-    <meta property="og:type" content="website" />
-</head>
-
-<body>
 
     <script>
         async function fetchAndReconstructImage() {
@@ -79,12 +70,14 @@
                 document.body.appendChild(centeredDiv);
             } catch (error) {
                 console.error('Failed to reconstruct image:', error);
-            }   
+            }
         }
 
         fetchAndReconstructImage();
     </script>
+</head>
 
+<body>
 </body>
 
 </html>
