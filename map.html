@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Reconstruct Image</title>
@@ -12,69 +13,78 @@
             align-items: center;
             background-color: black;
         }
+
         .centered-image img {
             max-width: 100%;
             max-height: 100%;
         }
     </style>
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Image Reconstruction Demo" />
+    <meta property="og:description" content="Demonstration of reconstructing images from chunks." />
+    <meta property="og:url" content="YOUR_PAGE_URL_HERE" /> <!-- Replace with your actual page URL -->
+    <meta property="og:image" content="https://via.placeholder.com/468" /> <!-- Example placeholder image -->
+    <meta property="og:type" content="website" />
 </head>
+
 <body>
 
-<script>
-async function fetchAndReconstructImage() {
-    try {
-        // Define the number of chunks
-        const chunkCount = 4; // Adjusted to 4 as per your specification
+    <script>
+        async function fetchAndReconstructImage() {
+            try {
+                // Define the number of chunks
+                const chunkCount = 4; // Adjusted to 4 as per your specification
 
-        // Construct URLs for fetching the chunks
-        const urls = [];
-        for (let i = 0; i < chunkCount; i++) {
-            urls.push(`/raw/map/map_chunk_${i}.txt`);
+                // Construct URLs for fetching the chunks
+                const urls = [];
+                for (let i = 0; i < chunkCount; i++) {
+                    urls.push(`/raw/map/chunk_${i}.txt`);
+                }
+
+                // Fetch and concatenate the chunks
+                const responses = await Promise.all(urls.map(async url =>
+                    fetch(url).then(response => response.text())
+                ));
+
+                // Assuming the fetched text is pure Base64 data, join them directly
+                const base64String = responses.join('');
+
+                if (base64String.length === 0) {
+                    throw new Error("No data retrieved from chunks.");
+                }
+
+                // Reconstruct the image from the Base64 string
+                const binaryData = atob(base64String);
+                const arrayBuffer = new ArrayBuffer(binaryData.length);
+                const uint8View = new Uint8Array(arrayBuffer);
+
+                for (let i = 0; i < binaryData.length; i++) {
+                    uint8View[i] = binaryData.charCodeAt(i);
+                }
+
+                const blob = new Blob([arrayBuffer], { type: "image/png" }); // Adjust MIME type accordingly
+                const imageUrl = URL.createObjectURL(blob);
+
+                // Display the reconstructed image
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                imgElement.alt = "Reconstructed Image";
+
+                // Wrap the image in a div for centering
+                const centeredDiv = document.createElement('div');
+                centeredDiv.className = 'centered-image';
+                centeredDiv.appendChild(imgElement);
+
+                // Append the wrapper div to the body instead of directly appending the img element
+                document.body.appendChild(centeredDiv);
+            } catch (error) {
+                console.error('Failed to reconstruct image:', error);
+            }   
         }
 
-        // Fetch and concatenate the chunks
-        const responses = await Promise.all(urls.map(async url =>
-            fetch(url).then(response => response.text())
-        ));
-
-        // Assuming the fetched text is pure Base64 data, join them directly
-        const base64String = responses.join('');
-
-        if (base64String.length === 0) {
-            throw new Error("No data retrieved from chunks.");
-        }
-
-        // Reconstruct the image from the Base64 string
-        const binaryData = atob(base64String);
-        const arrayBuffer = new ArrayBuffer(binaryData.length);
-        const uint8View = new Uint8Array(arrayBuffer);
-
-        for (let i = 0; i < binaryData.length; i++) {
-            uint8View[i] = binaryData.charCodeAt(i);
-        }
-
-        const blob = new Blob([arrayBuffer], {type: "image/png"}); // Adjust MIME type accordingly
-        const imageUrl = URL.createObjectURL(blob);
-
-        // Display the reconstructed image
-        const imgElement = document.createElement('img');
-        imgElement.src = imageUrl;
-        imgElement.alt = "Reconstructed Image";
-
-        // Wrap the image in a div for centering
-        const centeredDiv = document.createElement('div');
-        centeredDiv.className = 'centered-image';
-        centeredDiv.appendChild(imgElement);
-
-        // Append the wrapper div to the body instead of directly appending the img element
-        document.body.appendChild(centeredDiv);
-    } catch (error) {
-        console.error('Failed to reconstruct image:', error);
-    }
-}
-
-fetchAndReconstructImage();
-</script>
+        fetchAndReconstructImage();
+    </script>
 
 </body>
+
 </html>
